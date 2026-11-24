@@ -1,0 +1,399 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DistilClean external experiment configuration",
+  "type": "object",
+  "properties": {
+    "dataset": {
+      "enum": [
+        "hospital",
+        "flights",
+        "beers",
+        "rayyan",
+        "adult",
+        "soccer"
+      ]
+    },
+    "dirty": {
+      "type": "string",
+      "minLength": 1
+    },
+    "missing": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "fields": {
+      "type": "object"
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "detection": {
+      "type": "object",
+      "properties": {
+        "rare_max_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "rare_pattern_ratio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "neighbor_pool": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "neighbors": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "teacher_budget": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "feedback_budget": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "cluster_limit": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "propagation_threshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "pseudo_negative_budget": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "calibration_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "exclusiveMaximum": 1
+        },
+        "threshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "verifier_threshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "rounds": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "feedback_student": {
+          "enum": [
+            "update",
+            "freeze"
+          ]
+        },
+        "initial_replay": {
+          "enum": [
+            "resample",
+            "archive"
+          ]
+        },
+        "student": {
+          "type": "object",
+          "properties": {
+            "hidden": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "minItems": 1
+            },
+            "dropout": {
+              "type": "number",
+              "minimum": 0,
+              "exclusiveMaximum": 1
+            },
+            "learning_rate": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "batch_size": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "epochs": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "weight_decay": {
+              "type": "number",
+              "minimum": 0
+            },
+            "standardized_clip": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                }
+              ]
+            }
+          },
+          "required": [
+            "hidden",
+            "dropout",
+            "learning_rate",
+            "batch_size",
+            "epochs",
+            "weight_decay",
+            "standardized_clip"
+          ]
+        },
+        "verifier": {
+          "type": "object",
+          "properties": {
+            "minimum_samples": {
+              "type": "integer",
+              "minimum": 2
+            },
+            "n_estimators": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "max_depth": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              ]
+            },
+            "class_weight": {
+              "enum": [
+                null,
+                "balanced",
+                "balanced_subsample"
+              ]
+            },
+            "n_jobs": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                {
+                  "enum": [
+                    -1
+                  ]
+                }
+              ]
+            }
+          },
+          "required": [
+            "minimum_samples",
+            "n_estimators",
+            "max_depth",
+            "class_weight",
+            "n_jobs"
+          ]
+        }
+      },
+      "required": [
+        "rare_max_count",
+        "rare_pattern_ratio",
+        "neighbor_pool",
+        "neighbors",
+        "teacher_budget",
+        "feedback_budget",
+        "cluster_limit",
+        "propagation_threshold",
+        "pseudo_negative_budget",
+        "calibration_fraction",
+        "threshold",
+        "verifier_threshold",
+        "rounds",
+        "feedback_student",
+        "initial_replay",
+        "student",
+        "verifier"
+      ]
+    },
+    "repair": {
+      "type": "object",
+      "properties": {
+        "max_candidates": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "frequency_candidates": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "teacher_alternatives": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "teacher_budget": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "feedback_budget": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "cluster_limit": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "margin": {
+          "type": "number",
+          "minimum": 0
+        },
+        "rounds": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "expand_consensus": {
+          "type": "boolean"
+        },
+        "expansion_confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "student": {
+          "type": "object",
+          "properties": {
+            "hidden": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "minItems": 1
+            },
+            "dropout": {
+              "type": "number",
+              "minimum": 0,
+              "exclusiveMaximum": 1
+            },
+            "learning_rate": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "batch_size": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "epochs": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "weight_decay": {
+              "type": "number",
+              "minimum": 0
+            },
+            "standardized_clip": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                }
+              ]
+            }
+          },
+          "required": [
+            "hidden",
+            "dropout",
+            "learning_rate",
+            "batch_size",
+            "epochs",
+            "weight_decay",
+            "standardized_clip"
+          ]
+        }
+      },
+      "required": [
+        "max_candidates",
+        "frequency_candidates",
+        "teacher_alternatives",
+        "teacher_budget",
+        "feedback_budget",
+        "cluster_limit",
+        "margin",
+        "rounds",
+        "expand_consensus",
+        "expansion_confidence",
+        "student"
+      ]
+    },
+    "teacher": {
+      "type": "object",
+      "properties": {
+        "timeout": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "attempts": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "timeout",
+        "attempts"
+      ]
+    },
+    "runtime": {
+      "type": "object",
+      "properties": {
+        "seed": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967294
+        },
+        "device": {
+          "enum": [
+            "cpu",
+            "cuda"
+          ]
+        },
+        "threads": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "required": [
+        "seed",
+        "device",
+        "threads"
+      ]
+    }
+  },
+  "required": [
+    "dataset",
+    "dirty",
+    "missing",
+    "fields",
+    "rules",
+    "detection",
+    "repair",
+    "teacher",
+    "runtime"
+  ]
+}
