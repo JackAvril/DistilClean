@@ -35,6 +35,9 @@
     "detection": {
       "type": "object",
       "properties": {
+        "verifier_enabled": {
+          "type": "boolean"
+        },
         "rare_max_count": {
           "type": "integer",
           "minimum": 0
@@ -211,6 +214,7 @@
         }
       },
       "required": [
+        "verifier_enabled",
         "rare_max_count",
         "rare_pattern_ratio",
         "neighbor_pool",
@@ -222,12 +226,27 @@
         "pseudo_negative_budget",
         "calibration_fraction",
         "threshold",
-        "verifier_threshold",
         "rounds",
         "feedback_student",
         "initial_replay",
-        "student",
-        "verifier"
+        "student"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "verifier_enabled": {
+                "const": true
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "verifier",
+              "verifier_threshold"
+            ]
+          }
+        }
       ]
     },
     "repair": {

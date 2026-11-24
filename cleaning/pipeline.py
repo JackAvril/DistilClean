@@ -52,6 +52,8 @@ def parse_args():
     parser.add_argument("--config", type=Path, required=True, help="Complete external experiment configuration")
     parser.add_argument("--dirty", type=Path)
     parser.add_argument("--detections", type=Path, help="Detection run directory, required for correction")
+    parser.add_argument("--verifier", action=argparse.BooleanOptionalAction, default=None,
+                        help="Override detection.verifier_enabled for detection or all")
     parser.add_argument("--accept-legacy-detections", action="store_true",
                         help="Allow a schema 1 detection artifact for a controlled correction comparison")
     parser.add_argument("--rule-pool", type=Path, required=True, help="External rule-pool JSON")
@@ -77,6 +79,8 @@ def parse_args():
         parser.error("correction requires --detections")
     if args.mode != "correction" and args.detections is not None:
         parser.error("--detections is only used by correction")
+    if args.mode == "correction" and args.verifier is not None:
+        parser.error("--verifier/--no-verifier only applies to detection or all")
     if args.mode != "correction" and args.accept_legacy_detections:
         parser.error("--accept-legacy-detections is only used by correction")
     if args.legacy_rule_semantics == "archived" and args.rule_pool is None:
@@ -97,7 +101,7 @@ def run(args):
     import torch
     from threadpoolctl import threadpool_limits
 
-    settings = config_for(args.dataset, args.config)
+    settings = config_for(args.dataset, args.config, verifier_override=args.verifier)
     args.seed = settings["runtime"]["seed"]
     args.device = settings["runtime"]["device"]
     args.threads = settings["runtime"]["threads"]

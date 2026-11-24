@@ -152,6 +152,10 @@ def evidence_veto(item, settings):
 
 def detect(index, teacher, settings, run, output):
     feature_names = list(index.feature_names)
+    verifier_enabled = settings["verifier_enabled"]
+    if type(verifier_enabled) is not bool:
+        raise ValueError("detection.verifier_enabled must be a boolean")
+    run["verifier_enabled"] = verifier_enabled
     feedback_student = settings["feedback_student"]
     if feedback_student not in {"update", "freeze"}:
         raise ValueError(f"Invalid detector feedback policy: {feedback_student}")
@@ -259,13 +263,14 @@ def detect(index, teacher, settings, run, output):
             detector_scores = [sigmoid(score) for score in student.scores(vectors)]
             mode = "student"
         verifier = verifier_fit(sorted(set(labels) & calibrated), labels, vectors, detector_scores,
-                                settings["threshold"], seed, settings["verifier"]) if mode == "student" else None
+                                settings["threshold"], seed, settings["verifier"]) if verifier_enabled and mode == "student" else None
         keep = [1.0] * count
         if verifier:
             samples = np.column_stack([vectors, detector_scores])
             keep = verifier.predict_proba(samples)[:, list(verifier.classes_).index(1)].tolist()
-        final = [score if probability >= settings["verifier_threshold"] else 0.0
-                 for score, probability in zip(detector_scores, keep)]
+        final = ([score if probability >= settings["verifier_threshold"] else 0.0
+                  for score, probability in zip(detector_scores, keep)]
+                 if verifier_enabled else list(detector_scores))
         iterations.append({"round": round_id + 1, "training_labels": len(train),
                            "pseudo_negatives": pseudo_count,
                            "teacher_labels": len(labels), "calibration_labels": len(set(labels) & calibrated),
@@ -282,8 +287,11 @@ def detect(index, teacher, settings, run, output):
         if settings["feedback_budget"] == 0:
             break
         remaining = [i for i in feedback_available if i not in queried]
-        remaining.sort(key=lambda i: (min(abs(detector_scores[i] - settings["threshold"]),
-                                         abs(keep[i] - settings["verifier_threshold"])), -risks[i], i))
+        if verifier_enabled:
+            remaining.sort(key=lambda i: (min(abs(detector_scores[i] - settings["threshold"]),
+                                             abs(keep[i] - settings["verifier_threshold"])), -risks[i], i))
+        else:
+            remaining.sort(key=lambda i: (abs(detector_scores[i] - settings["threshold"]), -risks[i], i))
         if not remaining:
             break
         annotate(remaining[:settings["feedback_budget"]], "feedback")
@@ -353,5 +361,6 @@ def detect(index, teacher, settings, run, output):
         write_csv(output / "detection_context.csv", ["row_id", "column", *keys],
                   ([item.cell.row_id, item.cell.column, *(item.context_summary.get(key) for key in keys)]
                    for item in evidence))
-    write_json(output / "detection_training.json", {"scorer": mode, "rounds": iterations, "features": feature_names})
+    write_json(output / "detection_training.json", {"scorer": mode, "rounds": iterations, "features": feature_names,
+                                                    "verifier_enabled": verifier_enabled})
     return predictions

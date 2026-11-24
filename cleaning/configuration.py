@@ -39,6 +39,7 @@ VERIFIER = _object({
     "n_jobs": {"anyOf": [_integer(1), {"enum": [-1]}]},
 })
 DETECTION = _object({
+    "verifier_enabled": {"type": "boolean"},
     "rare_max_count": _integer(0), "rare_pattern_ratio": _number(0, 1),
     "neighbor_pool": _integer(1), "neighbors": _integer(1),
     "teacher_budget": _integer(0), "feedback_budget": _integer(0),
@@ -49,6 +50,9 @@ DETECTION = _object({
     "feedback_student": {"enum": ["update", "freeze"]},
     "initial_replay": {"enum": ["resample", "archive"]}, "student": STUDENT, "verifier": VERIFIER,
 })
+DETECTION["required"] = [key for key in DETECTION["required"] if key not in {"verifier", "verifier_threshold"}]
+DETECTION["allOf"] = [{"if": {"properties": {"verifier_enabled": {"const": True}}},
+                       "then": {"required": ["verifier", "verifier_threshold"]}}]
 REPAIR = _object({
     "max_candidates": _integer(1), "frequency_candidates": _integer(0),
     "teacher_alternatives": _integer(1), "teacher_budget": _integer(0), "feedback_budget": _integer(0),
@@ -112,6 +116,10 @@ def _validate(value, schema, location="config"):
 
 def validate_configuration(value, dataset):
     _validate(value, CONFIG_SCHEMA)
+    if value["detection"]["verifier_enabled"]:
+        missing = [key for key in ("verifier", "verifier_threshold") if key not in value["detection"]]
+        if missing:
+            raise ValueError("config.detection: explicitly configure " + ", ".join(missing))
     if value["dataset"] != dataset:
         raise ValueError("Configuration dataset does not match --dataset")
     if any(key in value for key in ("clean", "evaluation", "defaults")):
@@ -121,9 +129,15 @@ def validate_configuration(value, dataset):
     return value
 
 
-def config_for(dataset, configuration_path):
+def config_for(dataset, configuration_path, *, verifier_override=None):
     """Require one complete JSON configuration; never read bundled dataset defaults."""
     path = Path(configuration_path)
     with path.open(encoding="utf-8-sig") as handle:
         value = json.load(handle)
+    if verifier_override is not None:
+        if type(verifier_override) is not bool:
+            raise ValueError("Verifier override must be a boolean")
+        if not isinstance(value, dict) or not isinstance(value.get("detection"), dict):
+            raise ValueError("config.detection: expected object")
+        value["detection"]["verifier_enabled"] = verifier_override
     return validate_configuration(value, dataset)

@@ -90,6 +90,8 @@ COMMON_ARGS=(
   --output "$RUN_DIR/detection"
 ```
 
+Set `detection.verifier_enabled` explicitly to `true` or `false` in your configuration. Add `--verifier` or `--no-verifier` to a `detection` or `all` command to override it for that run. When disabled, Verifier training and filtering are skipped, its model settings and threshold may be omitted, and hard-case feedback continues using detector uncertainty. The student calibration split is retained. The effective switch is recorded in `run.json` and `detection_training.json`.
+
 ### Correction only
 
 ```bash
