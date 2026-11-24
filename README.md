@@ -127,12 +127,8 @@ Keep the model, endpoint, inputs and configuration unchanged. A missing cached r
 ```text
 cleaning/          Shared detection, correction, evidence and model modules
 configs/           External configuration schema
-tools/             Intermediate-output comparison utility
-tests/             Configuration, interface and output tests
 ```
 
 ```bash
 "$PY" -B -m cleaning --help
-"$PY" -B tools/stage_diff.py --help
-"$PY" -B -m unittest discover -s tests -v
 ```
