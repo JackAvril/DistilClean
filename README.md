@@ -19,7 +19,7 @@ PY="$PWD/.venv/bin/python"
 
 ## Prepare the inputs
 
-Download the dataset package from [Google Drive](https://drive.google.com/file/d/14vQuk0lV54QrfTzY8tvQAjgi6Vu4VV0y/view). It contains Dirty and Clean CSVs for all six datasets. Extract it into a directory containing the six dataset folders.
+Download the dataset package from [Google Drive](https://drive.google.com/file/d/14vQuk0lV54QrfTzY8tvQAjgi6Vu4VV0y/view?usp=sharing). It contains Dirty and Clean CSVs for all six datasets. Extract it into a directory containing the six dataset folders.
 
 Provide an external rule-pool JSON and a complete experiment configuration matching [configs/config.schema.json](configs/config.schema.json). The schema lists required settings and their allowed types and ranges. Set all training, inference, annotation and runtime parameters explicitly in your configuration.
 
